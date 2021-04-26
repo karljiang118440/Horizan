@@ -2,68 +2,7 @@
 
 
 
-# 2 
-
-
-##load Docker image
-sudo docker load -i docker_horizon_x3_tc_${version}.tar.gz
-
-sudo docker load -i docker_horizon_xj3_tc_v1.1.21i.tar.gz
-
-
-$ sudo docker load -i docker_horizon_xj3_tc_v1.1.21i.tar.gz
-[sudo] password for jcq: 
-77b174a6a187: Loading layer  211.2MB/211.2MB
-ff676a7854a9: Loading layer  370.1MB/370.1MB
-513b132d8c5c: Loading layer  104.1MB/104.1MB
-85579f083613: Loading layer  103.9MB/103.9MB
-8165a99e972a: Loading layer  776.3MB/776.3MB
-3d3f266d7a49: Loading layer   59.9kB/59.9kB
-b8c188178099: Loading layer  38.67MB/38.67MB
-395e31dccc3b: Loading layer  9.787MB/9.787MB
-92abc3924b8f: Loading layer  743.7MB/743.7MB
-Loaded image: docker.hobot.cc/aitools/horizon_xj3_tc:xj3_1.1.21i
-
-
-
-
-##initiate the Docker container in background:
-##wherein, /horizon_x3_tc_${version} and /data 
-##refer to the directories of release and dataset packages on host machine
-
-
-docker run -itd –rm \
--v /data:/data/horizon_x3/data \
--v /horizon_x3_tc_v1.1.21i:/horizon_x3_tc  \
-docker.hobot.cc/aitools/horizon_x3_tc:v1.1.21i
-##enter the container using docker exec
-##take the example that the container ID(get the ID using docker ps command) is 801e2c2405c1,
-##initiate the container as shown below:
-docker exec -it 801e2c2405c1 /bin/bash
-
-
-docker run -it --rm -v /media/jcq/Work/Horizan/x3:/data docker.hobot.cc/aitools/horizon_x3_tc:v1.1.21i
-
-
-docker run -it --rm -v /media/jcq/Work/Horizan/x3:/data docker.hobot.cc/aitools/horizon_x3_tc:v1.1.21i
-
-
-sudo docker run -itd –rm -v /media/jcq/Work/Horizan/x3:/data/horizon_x3/data -v /horizon_x3_tc_v1.1.21i:/horizon_x3_tc docker.hobot.cc/aitools/horizon_x3_tc:v1.1.21i
-
-
-## 2.1.2. gcc 
-
-
-
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 20 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8
- 
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 40 --slave /usr/bin/g++ g++ /usr/bin/g++-5
- 
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 30 --slave /usr/bin/g++ g++ /usr/bin/g++-6
-
-
-
-export PATH=/home/jcq/Tools/Cross_Compile/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin:$PATH
+# 1 . 参考资料
 
 
 
@@ -430,12 +369,23 @@ prob: [[0 2 7 6 5 1 3 8 9 4]]
 
  
 ## 3.1 
+
+
+sudo docker run -it --rm -v /media/jcq/Work/Horizan/x3:/data docker.hobot.cc/aitools/horizon_xj3_tc:xj3_1.1.21i
+
+
+cd /data/samples/05_miscellaneous/01_lenet_gray/mapper
+
+
 准备onnx模型，以PyTorch 为例，训练LeNet, 保存训练模型output/mnist.pth， 转换为 output/mnist.onnx
 
 详情请参照: https://github.com/onnx/tutorials/blob/master/tutorials/PytorchTensorflowMnist.ipynb
 或者直接下载 PytorchTensorflowMnist.ipynb: https://pan.horizon.ai/index.php/s/ESHHfL4EZk97CxL
 其他框架如 mxnet, tensorflow, cntk, pytorch等，请参考开源工程: https://github.com/onnx/tutorials/tree/master/tutorials
 
+
+
+## 3.2 sh 01_check.sh
 
 使用 lenet.onnx 文件做测试
 
@@ -449,13 +399,131 @@ prob: [[0 2 7 6 5 1 3 8 9 4]]
 
 需要替换 return F.log_softmax(x, dim=1) 为 return x
 
+
+
+### 3.2.1 onnx version 
+
+将保持的onnx opset 设置为 10，即可进行onnx 模型转换
+
+
+[root@b6268e9fc0be mapper]# sh 01_check.sh 
+++ dirname 01_check.sh
++ cd .
++ . ../env.conf
+++ sample_name=lenet_gray
+++ input_width=28
+++ input_height=28
+++ input_type=0
+++ score_threshold=0
+++ model_type=onnx
+++ proto=/data/modelzoo/mapper/other/lenet/lenet.onnx
+++ caffe_model=/data/modelzoo/mapper/other/lenet/lenet.onnx
+++ test_image=../lenet_data/0.jpg
+++ board_test_image=/userdata/samples/lenet_data/0.jpg
++ output=./lenet_gray_checker.log
++ march=bernoulli2
++ hb_mapper checker --model-type onnx --proto /data/modelzoo/mapper/other/lenet/lenet.onnx --model /data/modelzoo/mapper/other/lenet/lenet.onnx --output ./lenet_gray_checker.log --march bernoulli2
+2021-04-26 10:09:52,103 INFO Start hb_mapper....
+2021-04-26 10:09:52,103 INFO hb_mapper version 1.1.58
+2021-04-26 10:09:52,104 INFO Model type: onnx
+2021-04-26 10:09:52,105 INFO output file: ./lenet_gray_checker.log
+2021-04-26 10:09:52,105 INFO input names []
+2021-04-26 10:09:52,105 INFO input shapes {}
+2021-04-26 10:09:52,105 INFO Begin model checking....
+2021-04-26 10:09:52,105 INFO [Mon Apr 26 10:09:52 2021] Start to Horizon NN Model Convert.
+2021-04-26 10:09:52,105 INFO The input parameter is not specified, convert with default parameters.
+2021-04-26 10:09:52,105 INFO The hbdk parameter is not specified, and the submodel will be compiled with the default parameter.
+2021-04-26 10:09:52,105 INFO HorizonNN version: 0.9.7
+2021-04-26 10:09:52,106 INFO HBDK version: 3.16.6
+2021-04-26 10:09:52,106 INFO [Mon Apr 26 10:09:52 2021] Start to parse the onnx model.
+2021-04-26 10:09:52,111 INFO ONNX model info:
+ONNX IR version:  4
+Opset version:    10
+Input name:       input.1, [1, 3, 32, 32]
+2021-04-26 10:09:52,113 INFO [Mon Apr 26 10:09:52 2021] End to parse the onnx model.
+2021-04-26 10:09:52,113 INFO Model input names: ['input.1']
+2021-04-26 10:09:52,114 INFO Saving the original float model: ./.hb_check/original_float_model.onnx.
+2021-04-26 10:09:52,115 INFO [Mon Apr 26 10:09:52 2021] Start to optimize the model.
+2021-04-26 10:09:52,229 INFO [Mon Apr 26 10:09:52 2021] End to optimize the model.
+2021-04-26 10:09:52,231 INFO Saving the optimized model: ./.hb_check/optimized_float_model.onnx.
+2021-04-26 10:09:52,231 INFO [Mon Apr 26 10:09:52 2021] Start to calibrate the model.
+2021-04-26 10:09:52,233 INFO [Mon Apr 26 10:09:52 2021] End to calibrate the model.
+2021-04-26 10:09:52,233 INFO [Mon Apr 26 10:09:52 2021] Start to quantize the model.
+2021-04-26 10:09:52,239 INFO [Mon Apr 26 10:09:52 2021] End to quantize the model.
+2021-04-26 10:09:52,244 INFO Saving the quantized model: ./.hb_check/quantized_model.onnx.
+2021-04-26 10:09:52,244 INFO [Mon Apr 26 10:09:52 2021] Start to compile the model with march bernoulli2.
+2021-04-26 10:09:52,253 INFO Compile submodel: torch-jit-export_subgraph_0
+WARNING: the onnx model's ir_version is inconsistent with the ir_version of the parser.
+2021-04-26 10:09:52,259 INFO hbdk-cc parameters:{'optimize-level': 'O0', 'input-source': 'ddr', 'input-layout': 'NHWC', 'output-layout': 'NCHW'}
+[==================================================] 100%
+2021-04-26 10:09:52,309 INFO [Mon Apr 26 10:09:52 2021] End to compile the model with march bernoulli2.
+2021-04-26 10:09:52,309 INFO The converted model node information:
+=================================================
+Node          ON   Subgraph  Type                
+-------------------------------------------------
+11            BPU  id(0)     HzSQuantizedConv    
+13            BPU  id(0)     HzQuantizedMaxPool  
+14            BPU  id(0)     HzSQuantizedConv    
+16            BPU  id(0)     HzQuantizedMaxPool  
+25            BPU  id(0)     HzSQuantizedConv    
+27            BPU  id(0)     HzSQuantizedConv    
+29            BPU  id(0)     HzSQuantizedConv    
+29_reshape_0  CPU  --        Reshape             
+2021-04-26 10:09:52,310 INFO [Mon Apr 26 10:09:52 2021] End to Horizon NN Model Convert.
+2021-04-26 10:09:52,310 INFO model deps info empty
+2021-04-26 10:09:52,312 INFO End model checking....
+
 02_get_mnist.sh: 不做修改
 
-修改03_build.sh:
+
+
+## 03. 03_build.sh:
 
 model_type="onnx"
 
 修改lenet_gray_config.yaml
+
+[root@b6268e9fc0be mapper]# sh 03_build.sh 
+
+cd $(dirname $0) || exit
+. ../env.conf
+sample_name='lenet_gray'
+input_width=28
+input_height=28
+input_type=0  # BPU_TYPE_IMG_Y
+score_threshold=0
+
+
+model_type="onnx"
+# proto="/data/modelzoo/mapper/other/lenet/mnist-8.onnx"
+
+# caffe_model="/data/modelzoo/mapper/other/lenet/mnist-8.onnx"
+
+proto="/data/modelzoo/mapper/other/lenet/lenet.onnx"
+
+caffe_model="/data/modelzoo/mapper/other/lenet/lenet.onnx"
+
+
+test_image='../lenet_data/0.jpg'
+board_test_image='/userdata/samples/lenet_data/0.jpg'
+
+
+config_file="./${sample_name}_config.yaml"
+# model_type="caffe"
+model_type="onnx"  
+# build model
+hb_mapper makertbin --config ${config_file}  \
+                    --model-type  ${model_type}
+2021-04-26 10:13:59,201 INFO Start hb_mapper....
+2021-04-26 10:13:59,201 INFO hb_mapper version 1.1.58
+2021-04-26 10:13:59,215 INFO norm_types[i]: no_preprocess
+2021-04-26 10:13:59,219 INFO Working dir: /data/samples/05_miscellaneous/01_lenet_gray/mapper/model_output
+2021-04-26 10:13:59,219 INFO Start Model Convert....
+2021-04-26 10:13:59,220 ERROR wrong input name: 'data', available: ['input.1']
+2021-04-26 10:13:59,220 ERROR check_input_names failed
+
+
+这里输入的数据集并非是 mnist ，而是
 
 
 
@@ -467,6 +535,185 @@ model_type="onnx"
 
 
 
+# 四.定点模型上板测试.
+
+4.1， runtime_arm 为上板测试文件夹
+
+01_build.sh: 编译infer程序, 打包相关依赖库.
+
+源码为: samples\02_rt_sample_src\01_hr_example\src\infer.cc
+
+
+将测试图片../lenet_data/0.jpg，runtime_arm 文件夹，以及../mapper/model_output/lenet_gray_hybrid_horizonrt.bin
+
+拷贝到开发板的/userdata/
+
+修改dev_board_infer.sh
+
+
+运行结果:
+
+
+4.2， runtime_sim 为PC端模拟器测试
+
+01_build.sh :
+
+
+02_infer.sh
+
+
+
+
+
+
+
+
+
+# 五, 测试mobilenetV2推理速度
+
+## 5.1 文件功能说明
+
+
+sudo docker run -it --rm -v /media/jcq/Work/Horizan/x3:/data docker.hobot.cc/aitools/horizon_xj3_tc:xj3_1.1.21i
+
+
+cd /data/samples/03_classification/01_mobilenet/mapper
+
+
+env.conf: 配置示例名称 sample_name=mobilenetv2
+
+mapper: 将浮点模型转换为定点模型
+
+runtime_arm: 上板测试
+
+runtime_sim: 模拟器测试
+
+## 5.2 mapper编译模型
+
+检查模型: sh 01_check.sh
+
+修改路径 ：
+../../../01_common/modelzoo  --> /data/modelzoo
+
+
+放入原始图片到: ../../../01_common/data/imagenet/calibration_data
+
+
+
+
+校准数据预处理: sh 02_preprocess.sh
+
+复制yaml: cp mobilenet_config.yaml mobilenetv2_config.yaml
+
+修改mobilenetv2_config.yaml
+
+# Caffe浮点网络数据模型文件
+caffe_model: '../../../01_common/modelzoo/mapper/classification/mobilenet/mobilenet_v2.caffemodel'
+# Caffe网络描述文件
+prototxt: '../../../01_common/modelzoo/mapper/classification/mobilenet/mobilenet_v2_deploy.prototxt'
+# 模型转换输出的用于上板执行的模型文件
+output_model_file_prefix: 'mobilenetv2'
+修改 03_build.sh： config_file="./mobilenetv2_config.yaml"
+
+编译模型: sh 03_build.sh
+
+编译成功后，runtime使用模型为: model_output/mobilenetv2_hybrid_horizonrt.bin
+
+修改04_inference.sh : model_file="./model_output/mobilenetv2_quantized_model.onnx"
+
+运行单图测试: sh 04_inference.sh
+
+5.3 runtime_arm 上板跑FPS【单核单帧】
+
+登陆开发板: ssh root@192.168.168.10 .
+
+固定CPU和BPU频率:
+
+echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
+export HR_NODE_PROFILER=true
+进入文件夹: cd runtime_arm
+
+编译源码: sh 01_build.sh
+
+数据预处理: sh 02_preprocess.sh
+
+将数据和脚本发送到开发板上的/userdata/samples/:
+
+sh 03_scp_to_board.sh 192.168.168.10
+
+跑帧率:
+
+sh 05_perf.sh 192.168.168.10
+
+运行结果:
+
+===REPORT-START{RUNTIME-ARM-PERF}===
+
+Whole process statistics:count:100, duration:298.028ms, min:2.765ms, max:4.475ms, average:2.96722ms, fps:335.539/s
+
+, Infer stage statistics:count:100, duration:296.515ms, min:2.751ms, max:4.456ms, average:2.95212ms, fps:337.251/s
+
+, Post process stage statistics:count:100, duration:1.376ms, min:0.012ms, max:0.056ms, average:0.0133469ms, fps:72674.4/s
+
+===REPORT-END{RUNTIME-ARM-PERF}===
+
+测试结果解读:
+
+Whole process: 模型推理耗时+后处理耗时，
+
+最短耗时:2.765ms, 最长耗时:4.475ms, 平均耗时:2.96722ms, 帧率为 335.539 FPS
+
+Infer stage: 模型推理耗时统计
+
+Post process stage: 后处理耗时统计
+
+5.4 运行【双核双帧】测试
+
+登陆开发板: ssh root@192.168.168.10 .
+
+固定CPU和BPU频率:
+
+echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
+export HR_NODE_PROFILER=true
+修改配置: mobilenetv2_config.yaml
+
+input_type_rt: 'nv12'
+
+编译模型: sh 03_build.sh
+
+进入双帧双核测试目录:
+
+cd samples/05_miscellaneous/06_dual_frame_dual_core/shell
+
+编译测试源码:
+
+注释掉: #export LINARO_GCC_ROOT=
+
+sh build.sh
+
+拷贝定点模型到shell目录:
+
+cp ../../../03_classification/01_mobilenet/mapper/model_output/mobilenetv2_hybrid_horizonrt.bin ./
+
+将shell文件夹拷贝到开发板/userdata/samples:
+
+scp -r ../shell root@192.168.168.10:/userdata/samples/
+
+开始测试, 开发板上执行:
+
+sh start_mobileNetV2.sh
+
+运行一段时间，终止程序, 查看Log:
+
+method name:PostProcessMethod time:0.146
+
+frame_rate: 672.438
+
+测试结果解读:
+
+PostProcessMethod: 后处理耗时，0.146ms
+
+frame_rate: 帧率 672.438 FPS, 每个BPU核独立跑一帧 为 672.438/2 = 336.219 FPS
 
 
 
